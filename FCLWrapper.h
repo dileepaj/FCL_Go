@@ -19,6 +19,7 @@ public:
     std::string  GetTDPResultV2(const char *defFilePath ,const char *query,const char *json);
     std::string  GetOTPResultV2(const char *defFilePath ,const char *query,const char *json);
     std::string  GetCommonJSON(const char *defFilePath ,const char *query,const char *json);
+    std::string GetExecutionTemplateJSONString(const char *defFilePath, const char *query);
 };
 
 #endif //CODE_FCLWRAPPER_H
