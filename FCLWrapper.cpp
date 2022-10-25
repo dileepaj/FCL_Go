@@ -9,6 +9,7 @@
 #include "CommonIncludes.h"
 #include "LDAL_Wrapper.h"
 #include <string>
+#include "Formula.h"
 //#include "LogJsonParser.h"
 //#include "OTPParser.h"
 
@@ -69,4 +70,10 @@ std::string  FCLWrapper::GetTDPResultV2(const char *defFilePath ,const char *que
 std::string  FCLWrapper::GetCommonJSON(const char *defFilePath ,const char *query,const char *json ) {
     LDAL_Wrapper ldalWrapper;
     return  ldalWrapper.GetCommonJSONResult(defFilePath,query,json);
+}
+
+std::string FCLWrapper::GetExecutionTemplateJSONString(const char *defFilePath, const char *query)
+{
+    Formula fm;
+    return fm.BuildExecutionTemplateJSONString(defFilePath, query);
 }
