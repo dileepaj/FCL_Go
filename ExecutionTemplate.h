@@ -5,7 +5,7 @@ class ExecutionContext;
 
 class ExecutionTemplate : public Entity
 {
-protected:
+public:
 	MSTRING s_StartVarName;
 	LST_COMMANDPTR	lst_Commands;
 	PENTITY p_Entity;

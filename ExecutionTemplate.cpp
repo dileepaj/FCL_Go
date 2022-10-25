@@ -128,7 +128,9 @@ PENTITY ExecutionTemplate::Execute(ExecutionContext *pContext)
 		while(pCurr && (ite1 != iteEnd1))
 		{
 			PENTITY pNew = ExecuteCommand(pCurr, pContext, *ite1);
-			pCurr->Destroy();
+            if(pNew != pCurr){
+                pCurr->Destroy();
+            }
 			pCurr = pNew;
 			++ite1;
 		}

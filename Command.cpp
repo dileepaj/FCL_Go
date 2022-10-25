@@ -225,11 +225,12 @@ PENTITY Command::ExecuteIntCommand(MULONG ulCommand, PENTITY pEntity, PENTITY pA
 	{
 		return 0;
 	}
-    
-	PBool pBoolRes = 0;
-	PNull pNullRes = 0;
-	PString pStrRes = 0;
-    
+
+    PInt pIntRes = 0;//suggession
+    PBool pBoolRes = 0;
+    PNull pNullRes = 0;
+    PString pStrRes = 0;
+
 	switch(ulCommand)
 	{
         case COMMAND_TYPE_IS_INT_EQUAL_TO:
@@ -312,6 +313,7 @@ PENTITY Command::ExecuteIntCommand(MULONG ulCommand, PENTITY pEntity, PENTITY pA
 				MULONG ulVal = pInt->GetValue();
 				ulVal += (pIntArg->GetValue());
 				pInt->SetValue(ulVal);
+                pIntRes = pInt;
 			}
 			break;
 		}
@@ -324,6 +326,7 @@ PENTITY Command::ExecuteIntCommand(MULONG ulCommand, PENTITY pEntity, PENTITY pA
 				MULONG ulVal = pInt->GetValue();
 				ulVal -= (pIntArg->GetValue());
 				pInt->SetValue(ulVal);
+                pIntRes = pInt;
 			}
 			break;
 		}
@@ -333,19 +336,26 @@ PENTITY Command::ExecuteIntCommand(MULONG ulCommand, PENTITY pEntity, PENTITY pA
             {
                 MemoryManager::Inst.CreateObject(&pNullRes);
                 PInt pIntArg = (PInt)pArg;
-                MULONG ulVal = pIntArg->GetValue();
+                MULONG ulVal = pInt->GetValue();
+                ulVal = ulVal * pIntArg->GetValue();
                 pInt->SetValue(ulVal);
+                pIntRes = pInt;
             }
             break;
         }
-        case COMMAND_TYPE_TOSTRING:
-		{
-			MSTRINGSTREAM ss;
-			ss<<pInt->GetValue();
-			MemoryManager::Inst.CreateObject(&pStrRes);
-			pStrRes->SetValue(ss.str());
-			break;
-		}
+        case COMMAND_TYPE_DIVIDE:
+        {
+            if(ENTITY_TYPE_INT == pArg->ul_Type)
+            {
+                MemoryManager::Inst.CreateObject(&pNullRes);
+                PInt pIntArg = (PInt)pArg;
+                MULONG ulVal = pInt->GetValue();
+                ulVal = ulVal / pIntArg->GetValue();
+                pInt->SetValue(ulVal);
+                pIntRes = pInt;
+            }
+            break;
+        }
         case COMMAND_TYPE_PERCENTAGE:
         {
             if(ENTITY_TYPE_INT == pArg->ul_Type)
@@ -359,9 +369,33 @@ PENTITY Command::ExecuteIntCommand(MULONG ulCommand, PENTITY pEntity, PENTITY pA
             }
             break;
         }
+        case COMMAND_TYPE_AVERAGE:
+        {
+            if(ENTITY_TYPE_INT == pArg->ul_Type)
+            {
+                MemoryManager::Inst.CreateObject(&pStrRes);
+                PInt pIntArg = (PInt)pArg;
+                float ulVal = pInt->GetValue();
+                ulVal = ulVal / pIntArg->GetValue();
+                std::string floatString = std::to_string(roundf(ulVal * 100 ) / 100);
+                pStrRes->SetValue(floatString.substr(0, floatString.find(".") + 3));
+            }
+            break;
+        }
+        case COMMAND_TYPE_TOSTRING:
+        {
+            MSTRINGSTREAM ss;
+            ss<<pInt->GetValue();
+            MemoryManager::Inst.CreateObject(&pStrRes);
+            pStrRes->SetValue(ss.str());
+            break;
+        }
+    }
 
-	}
-    
+    if(0 != pIntRes)
+    {
+        return pIntRes;
+    }
 	if(0 != pBoolRes)
 	{
 		return pBoolRes;
@@ -883,58 +917,35 @@ PENTITY Command::ExecuteDateTimeCommand(MULONG ulCommand, PENTITY pEntity, PENTI
 PENTITY Command::ExecuteNodeCommand(MULONG ulCommand, PENTITY pEntity, ExecutionContext* pContext)
 {
     PNODE pNode = (PNODE)pEntity;
-	if(0 == pNode)
-	{
-		return 0;
-	}
-    
-	PNODE pNodeRes = 0;
-	PInt pIntRes = 0;
-	PString pStrRes = 0;
-	PENTITYLIST pNodeListRes = 0;
-	PNull pNullRes = 0;
-	PBool pBoolRes = 0;
+    if(0 == pNode)
+    {
+        return 0;
+    }
+
+    PNODE pNodeRes = 0;
+    PInt pIntRes = 0;
+    PString pStrRes = 0;
+    PENTITYLIST pNodeListRes = 0;
+    PNull pNullRes = 0;
+    PBool pBoolRes = 0;
     PENTITY pEntityRes = 0;
-    
+
     // first handle the commands that would need to access the execution context
     if (COMMAND_TYPE_FILTER_SUBTREE == ulCommand) {
         MemoryManager::Inst.CreateObject(&pNodeListRes);
         FilterSubTree(pNode, p_Arg, pContext, pNodeListRes);
-
     } else {
         // now handle commands that would not explicitly need the execution context
         // for these command, for the sake of simplicity, we first evaluate the command argument and use it subsequently
         PENTITY pArg = 0;
         if(0 != p_Arg)
-		{
-			p_EntityArg = p_Arg->Execute(pContext);
+        {
+            p_EntityArg = p_Arg->Execute(pContext);
             pArg = p_EntityArg;
-		}
-        
+        }
+
         switch(ulCommand)
         {
-            case COMMAND_TYPE_ADD_INNER_OBJ:
-            {
-                    if(ENTITY_TYPE_STRING == pArg->ul_Type){
-                        String* pStrArg = (String*)pArg;
-                        if(0!=pStrArg){
-                            MemoryManager::Inst.CreateObject(&pNullRes);
-                            pNodeRes = pNode->AddNode();
-                            pNodeRes->SetCustomString("object");
-                            pNodeRes->SetLValue((PMCHAR)pStrArg->GetValue().c_str());
-                        }
-                    }
-                break;
-            }
-            case COMMAND_TYPE_GET_NODE_OBJ:
-            {
-//                MemoryManager::Inst.CreateObject(&pNodeRes);
-                pNodeRes = MemoryManager::Inst.CreateNode(7777);
-                pNodeRes->SetValue("");
-                pNodeRes->SetLValue("");
-                pNodeRes->SetRValue("");
-                break;
-            }
             case COMMAND_TYPE_LEFT_SIBLING:
             {
                 pNodeRes = pNode->GetLeftSibling();
@@ -1385,13 +1396,13 @@ PENTITY Command::ExecuteNodeCommand(MULONG ulCommand, PENTITY pEntity, Execution
 				pBoolRes->SetValue(true);
                 break;
             }
-			case COMMAND_TYPE_GET_COMMA:
-			{
-				MemoryManager::Inst.CreateObject(&pStrRes);
-				PString pStr = (PString) ",";
-				pStrRes->SetValue(",");
-				break;
-			}
+            case COMMAND_TYPE_GET_COMMA:
+            {
+                MemoryManager::Inst.CreateObject(&pStrRes);
+                PString pStr = (PString) ",";
+                pStrRes->SetValue(",");
+                break;
+            }
             case COMMAND_TYPE_NEXT_SIBLING:
             {
 				pNodeRes = pNode->GetRightSibling();
@@ -1405,6 +1416,15 @@ PENTITY Command::ExecuteNodeCommand(MULONG ulCommand, PENTITY pEntity, Execution
             case COMMAND_TYPE_GET_CUSTOM_OBJ:
             {
                 pNodeRes = (PNODE)pNode->GetCustomObj();
+                break;
+            }
+            case COMMAND_TYPE_GET_NODE_OBJ:
+            {
+//                MemoryManager::Inst.CreateObject(&pNodeRes);
+                pNodeRes = MemoryManager::Inst.CreateNode(7777);
+                pNodeRes->SetValue("");
+                pNodeRes->SetLValue("");
+                pNodeRes->SetRValue("");
                 break;
             }
         }
@@ -1821,7 +1841,7 @@ PENTITY Command::ExecuteListCommand(MULONG ulCommand, PENTITY pEntity, Execution
             PNODE internalNode = (PNODE)pNodeList->GetCurrElem();
             while(internalNode != 0)
             {
-                pListRes->push_back(internalNode->GetCopy());
+                pListRes->push_back(internalNode);
                 pNodeList->Seek(1, false);
                 internalNode = (PNODE)pNodeList->GetCurrElem();
             }
