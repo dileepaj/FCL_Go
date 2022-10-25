@@ -81,6 +81,7 @@ protected:	MetaData* p_MetaData;
 public:
 	bool ProcessScript(MSTRING sFile, MetaData* pMD, ScriptReaderOutput& op);
 	std::string ProcessScript(MetaData* pMD, ScriptReaderOutput& op, MSTRING code);
+    ProcessLineRetVal ProcessLine(MSTRING sLine, MetaData* pMD);
 private:
 	void ReadFileToLines(MSTRING sFile, MSTRING sLineContinuation, MSTRING sCommentStart, LST_STR& lstLines, LST_INT& lstLineNumbers);
 	void ReadStringToLines(MSTRING sFile, MSTRING sLineContinuation, MSTRING sCommentStart, LST_STR& lstLines, LST_INT& lstLineNumbers);

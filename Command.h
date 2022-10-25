@@ -5,7 +5,7 @@ class ExecutionContext;
 
 class Command
 {
-protected:
+public:
 	MULONG ul_CommandType;
 	ExecutionTemplate* p_Arg;
 	PENTITY p_EntityArg;

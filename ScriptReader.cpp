@@ -16,12 +16,7 @@
 #include "BuildErrorHandler.h"
 
 
-BuildErrorHandler errorHandler;
 
-std::list<std::string> lst;
-std::list<std::string> lstIf;
-std::list<std::string> lstIfNot;
-std::list<std::string> lstVar;
 bool ScriptReader::ProcessScript(MSTRING sFile, MetaData* pMD, ScriptReaderOutput& op)
 {
     p_MetaData = pMD;
@@ -65,7 +60,7 @@ bool ScriptReader::ProcessScript(MSTRING sFile, MetaData* pMD, ScriptReaderOutpu
         //Print the line number and the content of the line aswel
 
 
-        ScriptReader::ProcessLineRetVal ret = ProcessLine(*ite1, pMD,*ite2,lstLines.size());
+        ScriptReader::ProcessLineRetVal ret = ProcessLine(*ite1, pMD);
 //        if(0 == ret.p_ET){
 //            return false;
 //		  }
@@ -134,37 +129,22 @@ std::string ScriptReader::ProcessScript(MetaData* pMD, ScriptReaderOutput& op, M
 
 
 
-     std::string result= errorHandler.IterateVar(lstLines);
+
 
 
     for( ; ite1 != iteEnd1; ++ite1, ++ite2)
     {
-         std::string line = std::regex_replace(*ite1, std::regex("^ +"), "");
-        ScriptReader::ProcessLineRetVal ret = ProcessLine(line, pMD,*ite2,lstLines.size());
+        std::string line = std::regex_replace(*ite1, std::regex("^ +"), "");
+        ScriptReader::ProcessLineRetVal ret = ProcessLine(line, pMD);
 
-         if(0 != ret.p_ET)
-         {
-                     MSTRINGSTREAM sCodeLine;
-                     sCodeLine<<*ite2<<_MSTR(:)<<SPACE<<*ite1;
-                     ret.p_ET->SetCodeLine(sCodeLine.str());
-         }else{
-
-
-                  if(ret.s_Str!="")
-                  {
-                                  errorHandler.PrintToConsole(*ite2,*ite1+"\t"+ret.s_Str);
-                                  return "\nError At line "+ std::to_string(*ite2) +"\t" +*ite1+"\t"+ret.s_Str;
-                  }
+        if(0 != ret.p_ET)
+        {
+            MSTRINGSTREAM sCodeLine;
+            sCodeLine<<*ite2<<_MSTR(:)<<SPACE<<*ite1;
+            ret.p_ET->SetCodeLine(sCodeLine.str());
+        }
 
 
-                              errorHandler.PrintToConsole(*ite2,*ite1);
-                              return "\nError At line "+ std::to_string(*ite2) +"\t" +*ite1;
-         }
-
-
-
-
-        //try to return false when it captures a syntax error
 
         if(SLT_FuncStart == ret.slt)
         {
@@ -192,12 +172,6 @@ std::string ScriptReader::ProcessScript(MetaData* pMD, ScriptReaderOutput& op, M
     }
 
 
-
-    if(result !="")
-       {
-
-           return result;
-       }
 
 
     return "";
@@ -264,97 +238,11 @@ void ScriptReader::ReadFileToLines(MSTRING sFile, MSTRING sLineContinuation, MST
     }
 }
 
-ScriptReader::ProcessLineRetVal ScriptReader::ProcessLine(MSTRING sLine, MetaData* pMD,int i,int total)
+ScriptReader::ProcessLineRetVal ScriptReader::ProcessLine(MSTRING sLine, MetaData* pMD)
 {
     // First, parse the string with the following as tokens
     // {, }, (, ), ,, =, .
     VEC_CE vecCE;
-
-        if( !errorHandler.CheckVarConv(sLine))
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = "Wrong variable convention";
-            return  ret;
-        }
-
-
-        if(!errorHandler.CheckBrackets(sLine))
-        {
-
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = "Brackets not closed or empty";
-            return  ret;
-        }
-
-        if(!errorHandler.CheckTags(sLine))
-        {
-
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = "Tags not closed or empty";
-            return  ret;
-        }
-
-
-        if(!errorHandler.ChecklineEnd(sLine))
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str="Line not ended correctly";
-            return  ret;
-        }
-
-
-
-        std::string res =errorHandler.CheckIfCondition(lstIf,sLine);
-        if( res !="")
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = "EndIf without IF condition";
-            return  ret;
-        }
-
-
-        std::string res2 =errorHandler.CheckIfNotCondition(lstIfNot,sLine);
-        if( res2 !="")
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = " IfNot without If condition";
-            return  ret;
-        }
-
-
-        if( !errorHandler.CheckCondition(sLine))
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = " does not contain a condition ";
-            return  ret;
-        }
-
-
-        if( !errorHandler.CheckEndLine(sLine,i,total))
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = "loop without usage ";
-            return  ret;
-        }
-
-
-        if( !errorHandler.ChecklineStart(sLine))
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = "missing $ or wrong  line start";
-            return  ret;
-        }
-
-
-
-        if( !errorHandler.CheckEqual(sLine))
-        {
-            ScriptReader::ProcessLineRetVal ret;
-            ret.s_Str = "missing =";
-            return  ret;
-        }
-
-
 
     GetCommandElements(sLine, vecCE, pMD);
     // Now this command element list needs to be unified with one of the following
@@ -370,16 +258,6 @@ ScriptReader::ProcessLineRetVal ScriptReader::ProcessLine(MSTRING sLine, MetaDat
     // 10. Continue
     // 11. Function=FuncName
     // 12. EndFunction
-
-
-
-     if(errorHandler.CheckForErrors(sLine, vecCE, i, pMD) == 0)
-        {
-
-
-            ScriptReader::ProcessLineRetVal ret;
-            return  ret;
-        }
 
     ScriptReader::ProcessLineRetVal ret;
 
