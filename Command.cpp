@@ -330,7 +330,7 @@ PENTITY Command::ExecuteIntCommand(MULONG ulCommand, PENTITY pEntity, PENTITY pA
 			}
 			break;
 		}
-        case COMMAND_TYPE_SET_INTEGER:
+        case COMMAND_TYPE_MULTIPLY:
         {
             if(ENTITY_TYPE_INT == pArg->ul_Type)
             {
@@ -353,6 +353,17 @@ PENTITY Command::ExecuteIntCommand(MULONG ulCommand, PENTITY pEntity, PENTITY pA
                 ulVal = ulVal / pIntArg->GetValue();
                 pInt->SetValue(ulVal);
                 pIntRes = pInt;
+            }
+            break;
+        }
+        case COMMAND_TYPE_SET_INTEGER:
+        {
+            if(ENTITY_TYPE_INT == pArg->ul_Type)
+            {
+                MemoryManager::Inst.CreateObject(&pNullRes);
+                PInt pIntArg = (PInt)pArg;
+                MULONG ulVal = pIntArg->GetValue();
+                pInt->SetValue(ulVal);
             }
             break;
         }

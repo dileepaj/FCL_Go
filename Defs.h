@@ -724,9 +724,6 @@
 #define     COMMAND_TYPE_GET_TIME_24_HOUR_FORMAT                        8015
 #define     COMMAND_TYPE_GET_YEAR                                       8016
 #define     COMMAND_TYPE_ADD_PERIOD                                     8017
-#define		COMMAND_TYPE_MULTIPLY										2102
-#define		COMMAND_TYPE_DIVIDE										    2103
-#define		COMMAND_TYPE_AVERAGE									    2105
 
 // Int Commands
 #define		COMMAND_TYPE_IS_INT_EQUAL_TO								2000
@@ -740,6 +737,9 @@
 #define		COMMAND_TYPE_TOSTRING										2200
 #define     COMMAND_TYPE_SET_INTEGER                                    2201
 #define     COMMAND_TYPE_PERCENTAGE                                     2202
+#define		COMMAND_TYPE_MULTIPLY										2102
+#define		COMMAND_TYPE_DIVIDE										    2103
+#define		COMMAND_TYPE_AVERAGE									    2105
 
 
 // Bool Commands
